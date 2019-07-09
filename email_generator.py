@@ -23,16 +23,20 @@ import string
 
 
 class EmailGenerator():
-    def __init__(self, file_path, csv_name, first_name_label, last_name_label, company_label, new_csv):
+    def __init__(self, file_path, csv_name, first_name_label, last_name_label, company_label, company_site, new_csv):
         self.path = file_path
         self.csv_name = csv_name
         self.first = first_name_label
         self.last = last_name_label
         self.company = company_label
+        self.site = company_site
         self.new_csv = new_csv
         self.emails_list = []
         self.full_path = ''
         self.backslash = False
+
+        self.com = []
+        self.net = []
 
 
     def get_data(self):
@@ -48,8 +52,10 @@ class EmailGenerator():
         first = [str(i) for i in np.asarray(data[self.first])]
         last = [str(i) for i in np.asarray(data[self.last])]
         company = [str(i) for i in np.asarray(data[self.company])]
+        site = [str(i) for i in np.asarray(data[self.site])]
 
-        self.data = np.column_stack((np.asarray(first), np.asarray(last), np.asarray(company)))
+
+        self.data = np.column_stack((np.asarray(first), np.asarray(last), np.asarray(company), np.asarray(site)))
 
     """define the name types"""
     def type1(self, first, last):
@@ -86,6 +92,25 @@ class EmailGenerator():
         co = co.replace(' ', '')
         return '@' + co + '.com'
 
+    def web_site(self, website_url, company):
+        if website_url == 'nan':
+            return self.at_co(company=company)
+        else:
+            # should end in .com or .net and have look like https://www.website.com or https://website.com
+            if 'com' in website_url.split('.')[-1]:
+                # this is a .com website
+                if 'www' in website_url:
+                    print(website_url.split('.')[1] + '.com')
+                else:
+                    print(website_url.split('/')[2] + '.com')
+            elif 'net' in website_url.split('.')[-1]:
+                # this is a .net website
+                if 'www' in website_url:
+                    print(website_url.split('.')[1] + '.net')
+                else:
+                    print(website_url.split('/')[2] + '.net')
+
+
     def to_csv(self):
         # last check to get rid of unwanted spaces
         e = []
@@ -105,21 +130,24 @@ class EmailGenerator():
 
     def controller(self):
         self.get_data()
+        #print(self.data)
         for point in self.data:
             if point[0] == 'nan' or point[1] == 'nan' or point[2] == 'nan':
                 # print("Insufficient Data, you are missing first, last, or company name")
                 pass
             else:
-                self.emails_list.append((self.type1(point[0], point[1]) + self.at_co(point[2]), point[0] + ' ' + point[1], point[2]))
-                self.emails_list.append((self.type2(point[0], point[1]) + self.at_co(point[2]), point[0] + ' ' + point[1], point[2]))
-                self.emails_list.append((self.type3(point[0], point[1]) + self.at_co(point[2]), point[0] + ' ' + point[1], point[2]))
-                self.emails_list.append((self.type4(point[0], point[1]) + self.at_co(point[2]), point[0] + ' ' + point[1], point[2]))
-                self.emails_list.append((self.type5(point[0], point[1]) + self.at_co(point[2]), point[0] + ' ' + point[1], point[2]))
-                self.emails_list.append((self.type6(point[0], point[1]) + self.at_co(point[2]), point[0] + ' ' + point[1], point[2]))
-                self.emails_list.append((self.type7(point[0], point[1]) + self.at_co(point[2]), point[0] + ' ' + point[1], point[2]))
-                self.emails_list.append((self.type8(point[0], point[1]) + self.at_co(point[2]), point[0] + ' ' + point[1], point[2]))
-                self.emails_list.append((self.type9(point[0], point[1]) + self.at_co(point[2]), point[0] + ' ' + point[1], point[2]))
-        self.to_csv()
+                self.web_site(website_url=point[3], company=point[2])
+                #self.emails_list.append((self.type1(point[0], point[1]) + self.web_site(website_url=point[3], company=point[2]), point[0] + ' ' + point[1],  point[2]))
+                #self.emails_list.append((self.type2(point[0], point[1]) + self.web_site(website_url=point[3], company=point[2]), point[0] + ' ' + point[1],  point[2]))
+                #self.emails_list.append((self.type3(point[0], point[1]) + self.web_site(website_url=point[3], company=point[2]), point[0] + ' ' + point[1],  point[2]))
+                #self.emails_list.append((self.type4(point[0], point[1]) + self.web_site(website_url=point[3], company=point[2]), point[0] + ' ' + point[1],  point[2]))
+                #self.emails_list.append((self.type5(point[0], point[1]) + self.web_site(website_url=point[3], company=point[2]), point[0] + ' ' + point[1],  point[2]))
+                #self.emails_list.append((self.type6(point[0], point[1]) + self.web_site(website_url=point[3], company=point[2]), point[0] + ' ' + point[1],  point[2]))
+                #self.emails_list.append((self.type7(point[0], point[1]) + self.web_site(website_url=point[3], company=point[2]), point[0] + ' ' + point[1],  point[2]))
+                #self.emails_list.append((self.type8(point[0], point[1]) + self.web_site(website_url=point[3], company=point[2]), point[0] + ' ' + point[1],  point[2]))
+                #self.emails_list.append((self.type9(point[0], point[1]) + self.web_site(website_url=point[3], company=point[2]), point[0] + ' ' + point[1],  point[2]))
+
+        #self.to_csv()
 
 
 if __name__ == '__main__':
@@ -128,7 +156,12 @@ if __name__ == '__main__':
     , and the name of the new csv that will be saved in the same path with all of the new emails."""
     emails = EmailGenerator(file_path='C:/Users/ToshWilcox/Tosh-projects/email_checker', csv_name='auto_finance.csv',
                             first_name_label='First Name', last_name_label='Last Name',
-                            company_label='Company Name', new_csv='generated_emails.csv')
+                            company_label='Company Name', company_site='Company Website', new_csv='TEST_generated_emails.csv')
     emails.controller()
+
+    # last time I used this I went in and took the company name out of the website and put it into a different column
+    # for example if the website was https://www.autofinance.com then I added autofinance.com to the column, that way you
+    # can just add @ or if there was not website just use the self.at_co function.  This will need to be changed so that
+    # doesn't have to be done manually.
 
 

@@ -10,6 +10,13 @@ import requests
 import time
 from selenium.webdriver.common.by import By
 import random
+# get the email sender from the linkedin_scrape folder
+import sys
+
+sys.path.insert(0, 'C:/Users/ToshWilcox/Tosh-projects/linkedin_scrape')
+
+import email_sender
+import datetime
 
 
 class EmailCheck():
@@ -167,10 +174,16 @@ class EmailCheck():
 
 if __name__ == '__main__':
 
-    abl = EmailCheck(path='C:/Users/ToshWilcox/Tosh-projects/email_checker', csv_name='generated_emails.csv',
-                     new_csv='valid.csv', update=True)
-    abl.controller()
+    try:
 
+        abl = EmailCheck(path='C:/Users/ToshWilcox/Tosh-projects/email_checker', csv_name='generated_emails.csv',
+                     new_csv='valid.csv', update=False)
+        abl.controller()
+    except:
+        sub = 'Error in email_checker.py python script'
+        mes = 'There was an error in the email_checker script,\n\n This occured at ' + str(datetime.datetime.now()) + \
+                '\n\n Please check the script and the server to make sure everything is working, then continure running.'
+        email_sender.send_email(sub, mes, 'tosh@finitive.com')
 
 
 
